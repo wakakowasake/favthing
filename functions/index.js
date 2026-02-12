@@ -8,7 +8,13 @@ const app = express();
 if (!admin.apps.length) {
   admin.initializeApp();
 }
-const db = admin.firestore();
+let db;
+const getDB = () => {
+  if (!db) {
+    db = admin.firestore();
+  }
+  return db;
+};
 
 // CORS 설정
 app.use(cors({
@@ -43,6 +49,7 @@ const sortByCreatedAtDesc = (items) => {
 // 공유용 읽기 전용 데이터 (수정 기능 없음)
 app.get("/share/:userId", async (req, res) => {
   try {
+    const db = getDB();
     const { userId } = req.params;
     if (!userId || !/^[A-Za-z0-9_-]{6,128}$/.test(userId)) {
       return res.status(400).json({ error: "Invalid userId" });
