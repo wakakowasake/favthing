@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addSeries, deleteSeries, getSeries } from './services/firebaseService';
 import { ZINDEX } from './constants/zIndex';
+import ManualAddModal from './components/ManualAddModal';
+
+const SERIES_MANUAL_FIELDS = [
+  { name: 'title', label: '제목', placeholder: '시리즈 제목', required: true },
+  { name: 'director', label: 'PD/제작자', placeholder: '예: 홍길동' },
+  { name: 'year', label: '공개 연도', placeholder: '예: 2025', type: 'number' },
+  { name: 'episodeCount', label: '에피소드 수', placeholder: '예: 12', type: 'number' },
+  { name: 'cast', label: '출연진', placeholder: '배우1, 배우2' },
+  { name: 'genres', label: '장르', placeholder: '예: 스릴러, 드라마' },
+  { name: 'overview', label: '줄거리', placeholder: '간단한 줄거리', multiline: true, rows: 4 },
+];
 
 export default function SeriesList({ userId, onSeriesLoad }) {
   const navigate = useNavigate();
@@ -19,6 +30,7 @@ export default function SeriesList({ userId, onSeriesLoad }) {
 
   // 시리즈 검색 모달
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showManualAddModal, setShowManualAddModal] = useState(false);
   const [tmdbSeries, setTmdbSeries] = useState([]);
   const [tmdbSearchQuery, setTmdbSearchQuery] = useState('');
   const [tmdbLoading, setTmdbLoading] = useState(false);
@@ -195,6 +207,28 @@ export default function SeriesList({ userId, onSeriesLoad }) {
     }
   };
 
+  const addSeriesManually = async (manualSeries) => {
+    const parsedEpisodeCount = parseInt(manualSeries.episodeCount, 10);
+    const newSeries = {
+      title: manualSeries.title,
+      image: manualSeries.image || '',
+      director: manualSeries.director || '',
+      year: manualSeries.year || '',
+      userRating: manualSeries.userRating || '',
+      comment: '',
+      overview: manualSeries.overview || '',
+      cast: manualSeries.cast || '',
+      genres: manualSeries.genres || '',
+      episodeCount: Number.isFinite(parsedEpisodeCount) ? parsedEpisodeCount : 0,
+      tmdbId: null,
+    };
+
+    const savedSeries = await addSeries(newSeries, userId);
+    const updatedSeries = [...addedSeries, savedSeries];
+    setAddedSeries(updatedSeries);
+    if (onSeriesLoad) onSeriesLoad(updatedSeries);
+  };
+
   // 시리즈 삭제
   const handleDelete = async (id) => {
     const confirmed = window.confirm('정말 이 시리즈를 삭제하시겠습니까?');
@@ -362,6 +396,13 @@ export default function SeriesList({ userId, onSeriesLoad }) {
             className="px-4 py-2 bg-primary text-black font-bold rounded-lg hover:bg-opacity-80 transition"
           >
             + 추가
+          </button>
+          <button
+            onClick={() => setShowManualAddModal(true)}
+            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-1"
+          >
+            <span className="material-icons-outlined text-base">edit</span>
+            직접 추가
           </button>
         </div>
       </div>
@@ -688,6 +729,17 @@ export default function SeriesList({ userId, onSeriesLoad }) {
           </div>
         </div>
       )}
+
+      <ManualAddModal
+        isOpen={showManualAddModal}
+        onClose={() => setShowManualAddModal(false)}
+        title="시리즈 직접 추가"
+        subtitle="검색 없이 시리즈 정보를 바로 입력할 수 있습니다."
+        imageLabel="포스터 이미지"
+        submitLabel="시리즈 추가"
+        fields={SERIES_MANUAL_FIELDS}
+        onSubmit={addSeriesManually}
+      />
     </div>
   );
 }

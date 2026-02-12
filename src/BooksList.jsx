@@ -2,6 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addBook, deleteBook, getBooks } from './services/firebaseService';
 import { ZINDEX } from './constants/zIndex';
+import ManualAddModal from './components/ManualAddModal';
+
+const BOOK_MANUAL_FIELDS = [
+  { name: 'title', label: '제목', placeholder: '책 제목', required: true },
+  { name: 'author', label: '저자', placeholder: '저자명', required: true },
+  { name: 'publisher', label: '출판사', placeholder: '출판사' },
+  { name: 'pubdate', label: '출판 연도', placeholder: '예: 2023', type: 'number' },
+  { name: 'link', label: '참고 링크', placeholder: 'https://...' },
+  { name: 'description', label: '설명', placeholder: '책 설명', multiline: true, rows: 4 },
+];
 
 export default function BooksList({ userId, onBooksLoad }) {
   const navigate = useNavigate();
@@ -19,6 +29,7 @@ export default function BooksList({ userId, onBooksLoad }) {
 
   // Naver 검색 모달
   const [showNaverModal, setShowNaverModal] = useState(false);
+  const [showManualAddModal, setShowManualAddModal] = useState(false);
   const [naverBooks, setNaverBooks] = useState([]);
   const [naverSearchQuery, setNaverSearchQuery] = useState('');
   const [naverLoading, setNaverLoading] = useState(false);
@@ -183,6 +194,26 @@ export default function BooksList({ userId, onBooksLoad }) {
     } catch (error) {
       console.error('책 추가 실패:', error);
     }
+  };
+
+  const addBookManually = async (manualBook) => {
+    const newBook = {
+      title: manualBook.title,
+      author: manualBook.author || '',
+      publisher: manualBook.publisher || '',
+      image: manualBook.image || '',
+      link: manualBook.link || '',
+      pubdate: manualBook.pubdate || '',
+      discount: '',
+      description: manualBook.description || '',
+      userRating: manualBook.userRating || '',
+      comment: '',
+    };
+
+    const savedBook = await addBook(newBook, userId);
+    const updatedBooks = [...addedBooks, savedBook];
+    setAddedBooks(updatedBooks);
+    if (onBooksLoad) onBooksLoad(updatedBooks);
   };
 
   // 책 삭제
@@ -357,6 +388,13 @@ export default function BooksList({ userId, onBooksLoad }) {
           >
             <span className="material-icons-outlined">add</span>
             책 추가
+          </button>
+          <button
+            onClick={() => setShowManualAddModal(true)}
+            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition flex items-center gap-1"
+          >
+            <span className="material-icons-outlined text-base">edit</span>
+            직접 추가
           </button>
         </div>
       </div>
@@ -732,6 +770,17 @@ export default function BooksList({ userId, onBooksLoad }) {
           </div>
         </div>
       )}
+
+      <ManualAddModal
+        isOpen={showManualAddModal}
+        onClose={() => setShowManualAddModal(false)}
+        title="책 직접 추가"
+        subtitle="검색 없이 책 정보를 바로 입력할 수 있습니다."
+        imageLabel="책 표지 이미지"
+        submitLabel="책 추가"
+        fields={BOOK_MANUAL_FIELDS}
+        onSubmit={addBookManually}
+      />
     </div>
   );
 }

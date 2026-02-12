@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addSong, deleteSong, getSongs } from './services/firebaseService';
 import { ZINDEX } from './constants/zIndex';
+import ManualAddModal from './components/ManualAddModal';
+
+const MUSIC_MANUAL_FIELDS = [
+  { name: 'title', label: '제목', placeholder: '음악 제목', required: true },
+  { name: 'artist', label: '아티스트', placeholder: '아티스트명', required: true },
+  { name: 'album', label: '앨범', placeholder: '앨범명' },
+  { name: 'year', label: '발매 연도', placeholder: '예: 2022', type: 'number' },
+];
 
 export default function MusicList({ userId, onMusicLoad }) {
   const navigate = useNavigate();
@@ -19,6 +27,7 @@ export default function MusicList({ userId, onMusicLoad }) {
 
   // Last.fm 검색 모달
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showManualAddModal, setShowManualAddModal] = useState(false);
   const [melonSongs, setMelonSongs] = useState([]);
   const [melonSearchQuery, setMelonSearchQuery] = useState('');
   const [melonLoading, setMelonLoading] = useState(false);
@@ -150,6 +159,23 @@ export default function MusicList({ userId, onMusicLoad }) {
     } catch (error) {
       alert('음악 추가에 실패했습니다.');
     }
+  };
+
+  const addSongManually = async (manualSong) => {
+    const newSong = {
+      title: manualSong.title,
+      artist: manualSong.artist || '아티스트 정보 없음',
+      album: manualSong.album || '',
+      image: manualSong.image || '',
+      year: manualSong.year || '',
+      userRating: manualSong.userRating || '',
+      comment: '',
+    };
+
+    const savedSong = await addSong(newSong, userId);
+    const updatedSongs = [...addedSongs, savedSong];
+    setAddedSongs(updatedSongs);
+    if (onMusicLoad) onMusicLoad(updatedSongs);
   };
 
   // 음악 삭제
@@ -322,6 +348,13 @@ export default function MusicList({ userId, onMusicLoad }) {
           >
             <span className="material-icons-outlined">add</span>
             음악 추가
+          </button>
+          <button
+            onClick={() => setShowManualAddModal(true)}
+            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition flex items-center gap-1"
+          >
+            <span className="material-icons-outlined text-base">edit</span>
+            직접 추가
           </button>
         </div>
       </div>
@@ -684,6 +717,17 @@ export default function MusicList({ userId, onMusicLoad }) {
           </div>
         </div>
       )}
+
+      <ManualAddModal
+        isOpen={showManualAddModal}
+        onClose={() => setShowManualAddModal(false)}
+        title="음악 직접 추가"
+        subtitle="검색 없이 음악 정보를 바로 입력할 수 있습니다."
+        imageLabel="앨범 커버 이미지"
+        submitLabel="음악 추가"
+        fields={MUSIC_MANUAL_FIELDS}
+        onSubmit={addSongManually}
+      />
     </div>
   );
 }

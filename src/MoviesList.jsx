@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addMovie, deleteMovie, getMovies } from './services/firebaseService';
 import { ZINDEX } from './constants/zIndex';
+import ManualAddModal from './components/ManualAddModal';
+
+const MOVIE_MANUAL_FIELDS = [
+  { name: 'title', label: '제목', placeholder: '영화 제목', required: true },
+  { name: 'director', label: '감독', placeholder: '감독명' },
+  { name: 'year', label: '개봉 연도', placeholder: '예: 2024', type: 'number' },
+  { name: 'actors', label: '배우', placeholder: '주요 배우' },
+  { name: 'genre', label: '장르', placeholder: '예: 드라마, 액션' },
+  { name: 'nation', label: '국가', placeholder: '예: 한국' },
+  { name: 'runtime', label: '상영 시간(분)', placeholder: '예: 120', type: 'number' },
+  { name: 'contentRating', label: '관람 등급', placeholder: '예: 15세 관람가' },
+  { name: 'description', label: '줄거리', placeholder: '간단한 줄거리', multiline: true, rows: 4 },
+];
 
 export default function MoviesList({ userId, onMoviesLoad }) {
   const navigate = useNavigate();
@@ -19,6 +32,7 @@ export default function MoviesList({ userId, onMoviesLoad }) {
 
   // 영화 검색 모달
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showManualAddModal, setShowManualAddModal] = useState(false);
   const [kmdbMovies, setKmdbMovies] = useState([]);
   const [kmdbSearchQuery, setKmdbSearchQuery] = useState('');
   const [kmdbLoading, setKmdbLoading] = useState(false);
@@ -158,6 +172,29 @@ export default function MoviesList({ userId, onMoviesLoad }) {
     } catch (error) {
       alert('영화 추가에 실패했습니다.');
     }
+  };
+
+  const addMovieManually = async (manualMovie) => {
+    const newMovie = {
+      title: manualMovie.title,
+      director: manualMovie.director || '감독 정보 없음',
+      actors: manualMovie.actors || '',
+      image: manualMovie.image || '',
+      backdrop_path: '',
+      year: manualMovie.year || '',
+      contentRating: manualMovie.contentRating || '',
+      userRating: manualMovie.userRating || '',
+      description: manualMovie.description || '',
+      genre: manualMovie.genre || '',
+      nation: manualMovie.nation || '',
+      runtime: manualMovie.runtime || '',
+      comment: '',
+    };
+
+    const savedMovie = await addMovie(newMovie, userId);
+    const updatedMovies = [...addedMovies, savedMovie];
+    setAddedMovies(updatedMovies);
+    if (onMoviesLoad) onMoviesLoad(updatedMovies);
   };
 
   // 영화 삭제
@@ -330,6 +367,13 @@ export default function MoviesList({ userId, onMoviesLoad }) {
           >
             <span className="material-icons-outlined">add</span>
             영화 추가
+          </button>
+          <button
+            onClick={() => setShowManualAddModal(true)}
+            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition flex items-center gap-1"
+          >
+            <span className="material-icons-outlined text-base">edit</span>
+            직접 추가
           </button>
         </div>
       </div>
@@ -698,6 +742,17 @@ export default function MoviesList({ userId, onMoviesLoad }) {
           </div>
         </div>
       )}
+
+      <ManualAddModal
+        isOpen={showManualAddModal}
+        onClose={() => setShowManualAddModal(false)}
+        title="영화 직접 추가"
+        subtitle="검색 없이 영화 정보를 바로 입력할 수 있습니다."
+        imageLabel="포스터 이미지"
+        submitLabel="영화 추가"
+        fields={MOVIE_MANUAL_FIELDS}
+        onSubmit={addMovieManually}
+      />
     </div>
   );
 }
