@@ -5,6 +5,8 @@ import { getStorage as getStorageSDK } from 'firebase/storage';
 
 let db, auth, storage, app;
 
+const useFirebaseEmulator = String(import.meta.env.VITE_USE_FIREBASE_EMULATOR || '').toLowerCase() === 'true';
+
 /**
  * 서버에서 Firebase 설정을 동적으로 가져와서 초기화
  */
@@ -45,7 +47,7 @@ export const initializeFirebase = async () => {
     
     // Localhost 환경에서만 Emulator에 연결
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalhost) {
+    if (isLocalhost && useFirebaseEmulator) {
       try {
         connectAuthEmulator(auth, "http://localhost:9099", { disableWarnings: true });
         connectFirestoreEmulator(db, 'localhost', 8080);

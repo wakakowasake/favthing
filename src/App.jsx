@@ -43,6 +43,7 @@ function AppContent() {
   const [addedBooks, setAddedBooks] = useState([]);
   const [addedSongs, setAddedSongs] = useState([]);
   const [addedSeries, setAddedSeries] = useState([]);
+  const useFirebaseEmulator = String(import.meta.env.VITE_USE_FIREBASE_EMULATOR || '').toLowerCase() === 'true';
 
   // 경로에 따라 activeTab 업데이트
   useEffect(() => {
@@ -66,9 +67,11 @@ function AppContent() {
       try {
         await initializeFirebase();
         const auth = getAuthService();
-        getRedirectResult(auth).catch((error) => {
-          console.error('Google redirect login failed:', error);
-        });
+        if (useFirebaseEmulator) {
+          getRedirectResult(auth).catch((error) => {
+            console.error('Google redirect login failed:', error);
+          });
+        }
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
           setUser(currentUser);
           setLoading(false);
@@ -140,7 +143,7 @@ function AppContent() {
     try {
       const auth = getAuthService();
 
-      if (isLocalhost) {
+      if (isLocalhost && useFirebaseEmulator) {
         const emulatorReady = await isAuthEmulatorReachable();
         if (!emulatorReady) {
           alert('Auth emulator (9099) is not running. Start it with: firebase emulators:start --only auth,firestore,functions');
