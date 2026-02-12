@@ -253,10 +253,10 @@ export default function MoviesList({ userId, onMoviesLoad }) {
           <div className="relative">
             <button
               onClick={() => setShowViewOptions(!showViewOptions)}
-              className="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded transition flex items-center gap-2"
+              className="h-11 w-11 md:w-32 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded transition flex items-center justify-center gap-2"
             >
-              <span className="material-icons-outlined">tune</span>
-              보기 옵션
+              <span className="material-icons-outlined text-[20px]">tune</span>
+              <span className="hidden md:inline">보기 옵션</span>
             </button>
 
             {/* 보기 옵션 패널 */}
@@ -363,17 +363,17 @@ export default function MoviesList({ userId, onMoviesLoad }) {
               setKmdbSearchQuery('');
               setKmdbMovies([]);
             }}
-            className="px-6 py-3 bg-primary hover:bg-red-700 text-white font-bold rounded transition flex items-center gap-2"
+            className="h-11 w-11 md:w-32 bg-primary hover:bg-red-700 text-white font-bold rounded transition flex items-center justify-center gap-2"
           >
-            <span className="material-icons-outlined">add</span>
-            영화 추가
+            <span className="material-icons-outlined text-[20px]">add</span>
+            <span className="hidden md:inline">영화 추가</span>
           </button>
           <button
             onClick={() => setShowManualAddModal(true)}
-            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded transition flex items-center gap-1"
+            className="h-11 w-11 md:w-32 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded transition flex items-center justify-center gap-2"
           >
-            <span className="material-icons-outlined text-base">edit</span>
-            직접 추가
+            <span className="material-icons-outlined text-[20px]">edit</span>
+            <span className="hidden md:inline">직접 추가</span>
           </button>
         </div>
       </div>
@@ -399,7 +399,7 @@ export default function MoviesList({ userId, onMoviesLoad }) {
       ) : filteredMovies.length > 0 ? (
         viewMode === 'card' ? (
           // 카드 뷰
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {sortedMovies.map((movie) => (
               <div
                 key={movie.id}

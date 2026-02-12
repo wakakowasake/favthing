@@ -287,10 +287,10 @@ export default function SeriesList({ userId, onSeriesLoad }) {
           <div className="relative">
             <button
               onClick={() => setShowViewOptions(!showViewOptions)}
-              className="px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded transition flex items-center gap-2"
+              className="h-11 w-11 md:w-32 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded transition flex items-center justify-center gap-2"
             >
-              <span className="material-icons-outlined">tune</span>
-              보기 옵션
+              <span className="material-icons-outlined text-[20px]">tune</span>
+              <span className="hidden md:inline">보기 옵션</span>
             </button>
 
             {/* 보기 옵션 패널 */}
@@ -393,16 +393,17 @@ export default function SeriesList({ userId, onSeriesLoad }) {
           {/* 추가 버튼 */}
           <button
             onClick={handleSearchClick}
-            className="px-4 py-2 bg-primary text-black font-bold rounded-lg hover:bg-opacity-80 transition"
+            className="h-11 w-11 md:w-32 bg-primary text-black font-bold rounded-lg hover:bg-opacity-80 transition flex items-center justify-center gap-2"
           >
-            + 추가
+            <span className="material-icons-outlined text-[20px]">add</span>
+            <span className="hidden md:inline">시리즈 추가</span>
           </button>
           <button
             onClick={() => setShowManualAddModal(true)}
-            className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-1"
+            className="h-11 w-11 md:w-32 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition flex items-center justify-center gap-2"
           >
-            <span className="material-icons-outlined text-base">edit</span>
-            직접 추가
+            <span className="material-icons-outlined text-[20px]">edit</span>
+            <span className="hidden md:inline">직접 추가</span>
           </button>
         </div>
       </div>
@@ -437,7 +438,7 @@ export default function SeriesList({ userId, onSeriesLoad }) {
         </div>
       ) : viewMode === 'card' ? (
         // 카드 보기
-        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div className="grid gap-6 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
           {sortedSeries.map((series) => (
             <div key={series.id} onClick={() => navigate(`/series/${series.id}`)} className="bg-gray-900 rounded-lg overflow-hidden hover:transform hover:scale-105 transition duration-300 group cursor-pointer flex flex-col">
               <div className="relative overflow-hidden bg-gray-800 flex-shrink-0 aspect-[2/3]">
