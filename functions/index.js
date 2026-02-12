@@ -1,9 +1,14 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require('firebase-functions/params');
+const admin = require("firebase-admin");
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
+const db = admin.firestore();
 
 // CORS 설정
 app.use(cors({
@@ -15,6 +20,54 @@ app.use(express.json());
 // Health check 엔드포인트
 app.get("/health", (req, res) => {
   res.json({ status: "OK" });
+});
+
+const serializeSharedDoc = (docSnap) => {
+  const data = docSnap.data();
+  return {
+    id: docSnap.id,
+    ...data,
+    createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
+    updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
+  };
+};
+
+const sortByCreatedAtDesc = (items) => {
+  return [...items].sort((a, b) => {
+    const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
+  });
+};
+
+// 공유용 읽기 전용 데이터 (수정 기능 없음)
+app.get("/share/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId || !/^[A-Za-z0-9_-]{6,128}$/.test(userId)) {
+      return res.status(400).json({ error: "Invalid userId" });
+    }
+
+    const [moviesSnap, booksSnap, musicSnap, seriesSnap] = await Promise.all([
+      db.collection("movies").where("userId", "==", userId).get(),
+      db.collection("books").where("userId", "==", userId).get(),
+      db.collection("music").where("userId", "==", userId).get(),
+      db.collection("series").where("userId", "==", userId).get(),
+    ]);
+
+    const movies = sortByCreatedAtDesc(moviesSnap.docs.map(serializeSharedDoc));
+    const books = sortByCreatedAtDesc(booksSnap.docs.map(serializeSharedDoc));
+    const music = sortByCreatedAtDesc(musicSnap.docs.map(serializeSharedDoc));
+    const series = sortByCreatedAtDesc(seriesSnap.docs.map(serializeSharedDoc));
+
+    res.json({ userId, movies, books, music, series });
+  } catch (error) {
+    console.error("Share API Error:", error.message);
+    res.status(500).json({
+      error: "Failed to load shared data",
+      message: error.message,
+    });
+  }
 });
 
 // KMDB API 영화 검색 (프록시) - 한국 영화

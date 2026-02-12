@@ -18,6 +18,7 @@ import MusicList from './MusicList';
 import MusicDetail from './MusicDetail';
 import SeriesList from './SeriesList';
 import SeriesDetail from './SeriesDetail';
+import SharePage from './SharePage';
 import { getMovies, getBooks, getSongs, getSeries } from './services/firebaseService';
 
 const googleProvider = new GoogleAuthProvider();
@@ -44,6 +45,7 @@ function AppContent() {
   const [addedSongs, setAddedSongs] = useState([]);
   const [addedSeries, setAddedSeries] = useState([]);
   const useFirebaseEmulator = String(import.meta.env.VITE_USE_FIREBASE_EMULATOR || '').toLowerCase() === 'true';
+  const isShareRoute = location.pathname.startsWith('/share/');
 
   // 경로에 따라 activeTab 업데이트
   useEffect(() => {
@@ -172,12 +174,43 @@ function AppContent() {
     }
   };
 
+  const handleSharePage = async () => {
+    if (!user?.uid) return;
+
+    const shareUrl = `${window.location.origin}/share/${user.uid}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'FAV-THING 공유',
+          text: '내 취향 목록 공유 페이지',
+          url: shareUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(shareUrl);
+      alert('공유 링크를 복사했습니다.');
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        window.prompt('공유 링크를 복사하세요:', shareUrl);
+      }
+    }
+  };
+
   // 모든 hooks를 먼저 호출한 후 조건부 렌더링
   if (loading) {
     return (
       <div className="min-h-screen bg-background-dark flex items-center justify-center">
         <div className="text-white text-xl">로딩 중...</div>
       </div>
+    );
+  }
+
+  if (isShareRoute) {
+    return (
+      <Routes>
+        <Route path="/share/:userId" element={<SharePage />} />
+      </Routes>
     );
   }
 
@@ -254,7 +287,15 @@ function AppContent() {
 
         <div className="flex items-center space-x-6 text-gray-300">
           <span className="material-icons-outlined cursor-pointer hover:text-white">search</span>
-          <span className="material-icons-outlined cursor-pointer hover:text-white">notifications</span>
+          <button
+            type="button"
+            onClick={handleSharePage}
+            className="flex items-center gap-1 hover:text-white transition"
+            title="공유 링크"
+          >
+            <span className="material-icons-outlined">share</span>
+            <span className="hidden md:inline text-xs font-bold">공유</span>
+          </button>
           <div className="relative group">
             <div className="flex items-center space-x-2 cursor-pointer">
               <div className="w-8 h-8 bg-blue-600 rounded-full overflow-hidden">
