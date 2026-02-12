@@ -11,7 +11,9 @@
     "deploy:firestore": "firebase deploy --only firestore:rules",
     "deploy:frontend": "npm run build && firebase deploy --only hosting",
     "deploy:functions": "firebase deploy --only functions",
-    "deploy:all": "npm run deploy:firestore && npm run deploy:functions && npm run deploy:frontend"
+    "deploy:all": "npm run deploy:firestore && npm run deploy:functions && npm run deploy:frontend",
+    "ship": "node scripts/ship.mjs",
+    "ship:fast": "node scripts/ship.mjs --no-deploy"
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",
