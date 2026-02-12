@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 인증된 사용자만 접근 가능
+    function isAuth() {
+      return request.auth != null;
+    }
+    
+    // 소유자 확인
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // 책 컬렉션
+    match /books/{document=**} {
+      allow read, write: if isAuth() && isOwner(resource.data.userId);
+      allow create: if isAuth() && isOwner(request.resource.data.userId);
+    }
+
+    // 영화 컬렉션
+    match /movies/{document=**} {
+      allow read, write: if isAuth() && isOwner(resource.data.userId);
+      allow create: if isAuth() && isOwner(request.resource.data.userId);
+    }
+
+    // 음악 컬렉션
+    match /music/{document=**} {
+      allow read, write: if isAuth() && isOwner(resource.data.userId);
+      allow create: if isAuth() && isOwner(request.resource.data.userId);
+    }
+
+    // 시리즈 컬렉션
+    match /series/{document=**} {
+      allow read, write: if isAuth() && isOwner(resource.data.userId);
+      allow create: if isAuth() && isOwner(request.resource.data.userId);
+    }
+  }
+}
