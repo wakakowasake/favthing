@@ -8,6 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .jsx,.js",
+    "emulators:start": "firebase emulators:start --only auth,firestore,functions",
+    "emulators:auth": "firebase emulators:start --only auth",
     "deploy:firestore": "firebase deploy --only firestore:rules",
     "deploy:frontend": "npm run build && firebase deploy --only hosting",
     "deploy:functions": "firebase deploy --only functions",

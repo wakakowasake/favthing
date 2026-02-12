@@ -4,6 +4,8 @@ import { initializeFirebase, getAuthService } from './firebase';
 import { ZINDEX } from './constants/zIndex';
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
@@ -19,6 +21,7 @@ import SeriesDetail from './SeriesDetail';
 import { getMovies, getBooks, getSongs, getSeries } from './services/firebaseService';
 
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export default function App() {
   return (
@@ -63,6 +66,9 @@ function AppContent() {
       try {
         await initializeFirebase();
         const auth = getAuthService();
+        getRedirectResult(auth).catch((error) => {
+          console.error('Google redirect login failed:', error);
+        });
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
           setUser(currentUser);
           setLoading(false);
@@ -119,13 +125,37 @@ function AppContent() {
     };
   }, [user?.uid]);
 
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  const isAuthEmulatorReachable = async () => {
+    try {
+      await fetch('http://localhost:9099/', { mode: 'no-cors' });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const handleGoogleLogin = async () => {
     try {
       const auth = getAuthService();
+
+      if (isLocalhost) {
+        const emulatorReady = await isAuthEmulatorReachable();
+        if (!emulatorReady) {
+          alert('Auth emulator (9099) is not running. Start it with: firebase emulators:start --only auth,firestore,functions');
+          return;
+        }
+
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
       const result = await signInWithPopup(auth, googleProvider);
       setUser(result.user);
     } catch (error) {
-      alert('로그인 실패: ' + error.message);
+      console.error('Google popup login failed:', error);
+      alert('Login failed (' + (error.code || 'unknown') + '): ' + error.message);
     }
   };
 
