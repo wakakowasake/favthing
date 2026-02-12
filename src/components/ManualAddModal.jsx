@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ZINDEX } from '../constants/zIndex';
 import { convertImageFileToDataUrl } from '../utils/imageUpload';
 
+const EMPTY_INITIAL_VALUES = Object.freeze({});
+
 const buildInitialForm = (fields, initialValues = {}) => {
   const base = { image: '', userRating: 0 };
   fields.forEach((field) => {
@@ -22,12 +24,13 @@ export default function ManualAddModal({
   imageLabel = '이미지',
   submitLabel = '추가하기',
   fields = [],
-  initialValues = {},
+  initialValues,
   onSubmit,
   onClose,
 }) {
+  const safeInitialValues = initialValues ?? EMPTY_INITIAL_VALUES;
   const fileInputRef = useRef(null);
-  const [form, setForm] = useState(() => buildInitialForm(fields, initialValues));
+  const [form, setForm] = useState(() => buildInitialForm(fields, safeInitialValues));
   const [hoverRating, setHoverRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -41,11 +44,11 @@ export default function ManualAddModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    setForm(buildInitialForm(fields, initialValues));
+    setForm(buildInitialForm(fields, safeInitialValues));
     setHoverRating(0);
     setErrorMessage('');
     setIsSubmitting(false);
-  }, [isOpen, fields, initialValues]);
+  }, [isOpen, fields, safeInitialValues]);
 
   if (!isOpen) {
     return null;
@@ -98,9 +101,16 @@ export default function ManualAddModal({
       payload[key] = typeof value === 'string' ? value.trim() : value;
     });
 
-    payload.userRating = currentRating > 0 ? String(currentRating) : '';
+    const normalizedRating = toNumber(payload.userRating);
+    payload.userRating = normalizedRating > 0 ? String(normalizedRating) : '';
     payload.image = payload.image || '';
     return payload;
+  };
+
+  const getPointerRating = (event, starIndex) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    return x < rect.width / 2 ? starIndex - 0.5 : starIndex;
   };
 
   const handleSubmit = async (event) => {
@@ -215,52 +225,49 @@ export default function ManualAddModal({
             ))}
           </div>
 
-          <div className="bg-gray-800/70 rounded-lg p-4">
+          <div className="bg-gray-800/70 rounded-lg p-4 text-center">
             <p className="text-white font-bold mb-3">내 평점 (선택)</p>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex justify-center gap-2 text-6xl mb-3">
               {[1, 2, 3, 4, 5].map((starIndex) => {
                 const displayRating = hoverRating > 0 ? hoverRating : currentRating;
                 const fillPercentage = Math.max(0, Math.min(displayRating - (starIndex - 1), 1));
+                const handleMouseMove = (event) => {
+                  setHoverRating(getPointerRating(event, starIndex));
+                };
+
+                const handleStarClick = (event) => {
+                  event.stopPropagation();
+                  const selectedRating = hoverRating > 0 ? hoverRating : getPointerRating(event, starIndex);
+                  setFieldValue('userRating', selectedRating);
+                  setHoverRating(0);
+                };
+
                 return (
                   <button
                     key={starIndex}
                     type="button"
-                    className="relative text-3xl leading-none"
-                    onMouseMove={(event) => {
-                      const rect = event.currentTarget.getBoundingClientRect();
-                      const x = event.clientX - rect.left;
-                      setHoverRating(x < rect.width / 2 ? starIndex - 0.5 : starIndex);
-                    }}
+                    className="relative cursor-pointer focus:outline-none"
+                    style={{ width: '60px', height: '60px', padding: 0, border: 'none', background: 'none' }}
+                    onMouseMove={handleMouseMove}
                     onMouseLeave={() => setHoverRating(0)}
-                    onClick={(event) => {
-                      const rect = event.currentTarget.getBoundingClientRect();
-                      const x = event.clientX - rect.left;
-                      setFieldValue('userRating', x < rect.width / 2 ? starIndex - 0.5 : starIndex);
-                    }}
+                    onClick={handleStarClick}
                   >
-                    <span className="text-gray-600">★</span>
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-500 pointer-events-none">
+                      ★
+                    </div>
                     {fillPercentage > 0 && (
-                      <span
-                        className="absolute left-0 top-0 text-primary overflow-hidden"
-                        style={{ width: `${Math.round(fillPercentage * 100)}%` }}
+                      <div
+                        className="absolute inset-0 flex items-center justify-center text-primary pointer-events-none"
+                        style={{ clipPath: `inset(0 ${(1 - fillPercentage) * 100}% 0 0)` }}
                       >
                         ★
-                      </span>
+                      </div>
                     )}
                   </button>
                 );
               })}
-              {currentRating > 0 && (
-                <button
-                  type="button"
-                  className="ml-2 text-xs text-gray-400 hover:text-white transition"
-                  onClick={() => setFieldValue('userRating', 0)}
-                >
-                  초기화
-                </button>
-              )}
             </div>
-            <p className="text-sm text-primary font-bold">
+            <p className={`font-bold min-h-[1.5rem] ${currentRating > 0 ? 'text-primary text-xl' : 'text-gray-400 text-sm'}`}>
               {currentRating > 0 ? `${currentRating}점` : '평점 없음'}
             </p>
           </div>
@@ -293,4 +300,3 @@ export default function ManualAddModal({
     </div>
   );
 }
-
