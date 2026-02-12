@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addSeries, deleteSeries, getSeries } from './services/firebaseService';
+import { addSeries, getSeries } from './services/firebaseService';
 import { ZINDEX } from './constants/zIndex';
 import ManualAddModal from './components/ManualAddModal';
 
@@ -229,21 +229,6 @@ export default function SeriesList({ userId, onSeriesLoad }) {
     if (onSeriesLoad) onSeriesLoad(updatedSeries);
   };
 
-  // 시리즈 삭제
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm('정말 이 시리즈를 삭제하시겠습니까?');
-    if (!confirmed) return;
-
-    try {
-      await deleteSeries(id);
-      const updated = addedSeries.filter((s) => s.id !== id);
-      setAddedSeries(updated);
-      if (onSeriesLoad) onSeriesLoad(updated);
-    } catch (error) {
-      console.error('시리즈 삭제 실패:', error);
-    }
-  };
-
   // 필터링
   const filteredSeries = addedSeries.filter((series) =>
     series.title?.toLowerCase().includes(searchQueryLocal.toLowerCase())
@@ -281,7 +266,7 @@ export default function SeriesList({ userId, onSeriesLoad }) {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-black text-primary">시리즈 리스트</h1>
+        <h1 className="text-4xl font-black text-primary break-keep">시리즈 리스트</h1>
         <div className="flex items-center gap-3">
           {/* 보기 옵션 버튼 */}
           <div className="relative">
@@ -393,7 +378,7 @@ export default function SeriesList({ userId, onSeriesLoad }) {
           {/* 추가 버튼 */}
           <button
             onClick={handleSearchClick}
-            className="h-11 w-11 md:w-32 bg-primary text-black font-bold rounded-lg hover:bg-opacity-80 transition flex items-center justify-center gap-2"
+            className="h-11 w-11 md:w-32 bg-primary hover:bg-red-700 text-white font-bold rounded transition flex items-center justify-center gap-2"
           >
             <span className="material-icons-outlined text-[20px]">add</span>
             <span className="hidden md:inline">시리즈 추가</span>
@@ -485,70 +470,55 @@ export default function SeriesList({ userId, onSeriesLoad }) {
         </div>
       ) : (
         // 목록 보기
-        <div className="space-y-3">
+        <div className="space-y-2">
           {sortedSeries.map((series) => (
             <div
               key={series.id}
               onClick={() => navigate(`/series/${series.id}`)}
-              className="bg-gray-900 rounded-lg p-4 flex items-center gap-4 cursor-pointer hover:bg-gray-800 transition group"
+              className="bg-gray-900 rounded-lg p-4 flex items-center gap-4 hover:bg-gray-800 transition cursor-pointer group"
             >
-              {/* 이미지 */}
-              <div className="w-24 h-32 flex-shrink-0 rounded overflow-hidden">
+              <div className="flex-shrink-0 w-12 h-16 rounded overflow-hidden bg-gray-800">
                 {series.image ? (
                   <img
                     src={series.image}
                     alt={series.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                    className="w-full h-full object-contain group-hover:scale-105 transition duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                    <span className="material-icons-outlined text-gray-600">theaters</span>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="material-icons-outlined text-xl text-gray-500">theaters</span>
                   </div>
                 )}
               </div>
 
-              {/* 정보 */}
               <div className="flex-grow">
-                <h3 className="font-bold text-white text-lg group-hover:text-primary transition">
-                  {series.title}
-                </h3>
-                <p className="text-gray-400 text-sm">{series.director}</p>
-                <p className="text-gray-500 text-xs mt-1">{series.year}</p>
-              </div>
-
-              {/* 평점 및 삭제 */}
-              <div className="flex items-center gap-4">
-                {series.userRating && (
-                  <div className="flex gap-0 text-lg">
-                    {[1, 2, 3, 4, 5].map((starIndex) => {
-                      const rating = parseFloat(series.userRating) || 0;
-                      const fillPercentage = Math.max(0, Math.min(rating - (starIndex - 1), 1));
-                      
-                      return (
-                        <div key={starIndex} className="relative">
-                          <span className="text-gray-600">★</span>
-                          {fillPercentage > 0 && (
-                            <span
-                              className="absolute left-0 top-0 text-primary overflow-hidden"
-                              style={{ width: `${Math.round(fillPercentage * 100)}%` }}
-                            >
-                              ★
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(series.id);
-                  }}
-                  className="p-2 text-red-400 hover:text-red-300 transition"
-                >
-                  <span className="material-icons-outlined">delete</span>
-                </button>
+                <h3 className="font-bold text-base mb-1">{series.title}</h3>
+                <div className="flex items-center gap-4 text-sm">
+                  <p className="text-gray-400">{series.director}</p>
+                  {series.year && <p className="text-gray-500">{series.year}년</p>}
+                  {series.userRating && (
+                    <div className="flex gap-0 text-lg">
+                      {[1, 2, 3, 4, 5].map((starIndex) => {
+                        const rating = parseFloat(series.userRating) || 0;
+                        const fillPercentage = Math.max(0, Math.min(rating - (starIndex - 1), 1));
+                        
+                        return (
+                          <div key={starIndex} className="relative">
+                            <span className="text-gray-600">★</span>
+                            {fillPercentage > 0 && (
+                              <span
+                                className="absolute left-0 top-0 text-primary overflow-hidden"
+                                style={{ width: `${Math.round(fillPercentage * 100)}%` }}
+                              >
+                                ★
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}

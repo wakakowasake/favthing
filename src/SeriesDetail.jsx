@@ -193,7 +193,7 @@ export default function SeriesDetail({ series, userId }) {
                 {currentSeries.userRating && (
                   <div className="bg-gray-800 p-3 rounded">
                     <p className="text-gray-500 text-sm mb-1">내 평점</p>
-                    <div className="flex gap-0">
+                    <div className="detail-rating-stars">
                       {[1, 2, 3, 4, 5].map((starIndex) => {
                         const displayRating = hoverTempRating > 0 ? hoverTempRating : currentRating;
                         const fillPercentage = Math.max(0, Math.min(displayRating - (starIndex - 1), 1));
@@ -219,7 +219,7 @@ export default function SeriesDetail({ series, userId }) {
                                 alert('평점 저장에 실패했습니다: ' + error.message);
                               }
                             }}
-                            className="relative text-2xl cursor-pointer hover:scale-110 transition"
+                            className="detail-rating-star relative cursor-pointer transition leading-none flex-shrink-0"
                           >
                             <span className="text-gray-600">★</span>
                             {fillPercentage > 0 && (

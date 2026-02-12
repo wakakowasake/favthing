@@ -268,7 +268,7 @@ export default function BooksList({ userId, onBooksLoad }) {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-black text-primary">도서 리스트</h1>
+        <h1 className="text-4xl font-black text-primary break-keep">도서 리스트</h1>
         <div className="flex items-center gap-3">
           {/* 보기 옵션 버튼 */}
           <div className="relative">
@@ -423,6 +423,7 @@ export default function BooksList({ userId, onBooksLoad }) {
             {sortedBooks.map((book) => (
             <div
               key={book.id}
+              onClick={() => navigate(`/books/${book.id}`)}
               className="bg-gray-900 rounded-lg overflow-hidden hover:transform hover:scale-105 transition duration-300 group cursor-pointer flex flex-col"
             >
               <div className="relative overflow-hidden bg-gray-800 flex-shrink-0 aspect-[2/3]">

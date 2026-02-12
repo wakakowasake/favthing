@@ -228,7 +228,7 @@ export default function MusicList({ userId, onMusicLoad }) {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-black text-primary">음악 리스트</h1>
+        <h1 className="text-4xl font-black text-primary break-keep">음악 리스트</h1>
         <div className="flex items-center gap-3">
           {/* 보기 옵션 버튼 */}
           <div className="relative">

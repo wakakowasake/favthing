@@ -40,3 +40,37 @@ body {
   backdrop-filter: blur(10px);
   background-color: rgba(20, 20, 20, 0.7);
 }
+
+.detail-rating-stars {
+  --rating-star-gap: 0.14rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rating-star-gap);
+  width: 100%;
+  max-width: 100%;
+}
+
+.detail-rating-star {
+  --detail-star-size: clamp(0.95rem, 1.9vw, 1.7rem);
+  position: relative;
+  cursor: pointer;
+  line-height: 1;
+  flex: 0 1 auto;
+  width: var(--detail-star-size);
+  height: var(--detail-star-size);
+  font-size: var(--detail-star-size);
+  transition: transform 0.2s ease;
+}
+
+@media (max-width: 500px) {
+  .detail-rating-stars {
+    --rating-star-gap: 0.1rem;
+    container-type: inline-size;
+  }
+
+  .detail-rating-star {
+    --detail-star-size: clamp(1.3rem, 5.2vw, 1.95rem);
+    --detail-star-size: clamp(1.3rem, 18cqi, 1.95rem);
+  }
+}

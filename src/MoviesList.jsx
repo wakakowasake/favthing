@@ -247,7 +247,7 @@ export default function MoviesList({ userId, onMoviesLoad }) {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-black text-primary">영화 리스트</h1>
+        <h1 className="text-4xl font-black text-primary break-keep">영화 리스트</h1>
         <div className="flex items-center gap-3">
           {/* 보기 옵션 버튼 */}
           <div className="relative">
