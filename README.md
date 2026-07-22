@@ -71,6 +71,17 @@ npm run dev
 # → Vue.js + Vite App running on http://localhost:3000
 ```
 
+### 3-1. 모바일 앱(React Native, Expo) 실행
+
+```bash
+cd mobile
+cp .env.example .env
+npm install
+npm run start
+```
+
+`mobile/.env`에는 `EXPO_PUBLIC_FIREBASE_*` 값을 채워야 합니다.
+
 #### Firebase 설정
 1. [Firebase Console](https://console.firebase.google.com/)에서 프로젝트 생성
 2. 웹앱 추가
@@ -124,6 +135,11 @@ Firebase 초기화
 
 ```
 fav/
+├── mobile/                       (React Native 앱 - Expo)
+│   ├── App.js
+│   ├── index.js
+│   ├── .env.example
+│   └── src/
 ├── src/                          (React 프론트엔드 - Vite)
 │   ├── App.jsx                   (메인 앱, Google 인증)
 │   ├── BooksList.jsx             (책 관리 + Naver 검색)

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quick References: FAV-THING Trendy Mobile</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #101319;
+        --muted: #667085;
+        --line: #d9e2ef;
+        --panel: #ffffff;
+        --soft: #eef7ff;
+        --accent: #e63845;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: #f6f8fb;
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 44px 20px 72px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 38px;
+        line-height: 1.1;
+        letter-spacing: 0;
+      }
+      h2 {
+        margin: 44px 0 14px;
+        font-size: 23px;
+      }
+      h3 {
+        margin: 28px 0 12px;
+        font-size: 18px;
+      }
+      p { margin: 0 0 14px; }
+      .meta {
+        color: var(--muted);
+        margin-bottom: 24px;
+      }
+      .callout {
+        background: var(--soft);
+        border: 1px solid #b9dcff;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 22px 0;
+      }
+      .pattern {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 18px;
+        margin-top: 16px;
+        box-shadow: 0 14px 28px rgba(16, 19, 25, 0.06);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+      figure {
+        margin: 0;
+      }
+      img {
+        width: 100%;
+        display: block;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        box-shadow: 0 12px 24px rgba(16, 19, 25, 0.10);
+      }
+      figcaption {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      code, pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+      pre {
+        background: #101319;
+        color: #edf2f7;
+        border-radius: 8px;
+        padding: 14px;
+        overflow: auto;
+      }
+      .tag {
+        display: inline-block;
+        margin-right: 6px;
+        color: #8a1f2d;
+        font-weight: 700;
+      }
+      .accent { color: var(--accent); font-weight: 800; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Quick References: FAV-THING Trendy Mobile</h1>
+      <p class="meta">Lazyweb mobile screenshots collected on 2026-05-25. Topic: media favorites, library, onboarding, search/add flows.</p>
+
+      <section class="callout">
+        <strong>TL;DR</strong>
+        <p>트렌디한 미디어 컬렉션 앱은 <span class="accent">짙은 배경, 포스터 중심 레일, 빠른 검색, 명확한 저장 액션, 촘촘한 라이브러리 탭</span> 조합이 가장 강합니다.</p>
+      </section>
+
+      <section>
+        <h2>Current State</h2>
+        <div class="grid">
+          <figure>
+            <img src="references/current-state.png" alt="Current FAV-THING RN login screen">
+            <figcaption>FAV-THING RN 현재 로그인 화면. 기본 구조는 안정적이지만 첫 화면의 시각 자산과 컬렉션 맥락이 부족합니다.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h2>Patterns</h2>
+        <div class="pattern">
+          <h3>1. Library As A Dense Command Center</h3>
+          <p>Spotify, Tidal, Google Photos는 라이브러리를 단순 목록이 아니라 카테고리, 최근 활동, 빠른 액션이 모인 홈으로 씁니다. FAV-THING도 각 탭 상단에 저장 수, 최근 카드, 검색을 함께 두는 편이 좋습니다.</p>
+          <pre>┌──────────────────────────┐
+│ FAV-THING     [share][+] │
+│ 영화 12 · 평점 4.2       │
+│ [검색................]   │
+│ ┌ poster ┐ 오늘의 픽      │
+│ └────────┘ meta + rating │
+│ [전체] [평점] [최근]      │
+│ item row / item row      │
+└──────────────────────────┘</pre>
+        </div>
+        <div class="pattern">
+          <h3>2. Search First, Then Save</h3>
+          <p>Fever, Max, Audible은 검색 입력과 결과 카드를 화면의 주요 행동으로 배치합니다. 추가 모달도 API 검색 결과가 먼저 보이고, 선택 후 수동 필드를 보완하는 흐름이 어울립니다.</p>
+        </div>
+        <div class="pattern">
+          <h3>3. Login With Visual Context</h3>
+          <p>ChatGPT식 미니멀 인증은 깔끔하지만, ReelShort/Poshmark처럼 배경에 콘텐츠 조각을 깔면 앱의 목적이 즉시 보입니다. FAV-THING은 영화/책/음악/시리즈 타일을 로그인 화면 상단에 보여주는 쪽이 맞습니다.</p>
+        </div>
+        <div class="pattern">
+          <h3>4. Collections Need A Shareable Identity</h3>
+          <p>Perplexity와 Artsy는 컬렉션을 탭과 묶음 미리보기로 다룹니다. 공유 조회 화면도 단순 userId 조회보다 시각적인 저장 목록 피드처럼 보여야 합니다.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>References</h2>
+
+        <h3>Pattern A: Library Density</h3>
+        <div class="grid">
+          <figure>
+            <img src="references/spotify-library-home.png" alt="Spotify library and home reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Spotify — 카테고리 필터, 최근 항목 그리드, 추천 레일이 한 화면에 결합됩니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/tidal-library.png" alt="Tidal library reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Tidal — My Collection 탭과 카테고리 링크가 빠른 탐색 허브 역할을 합니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/google-photos-collections.png" alt="Google Photos collections reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Google Photos — Favorites, Archive, Create album 같은 액션을 컬렉션 첫 화면에 둡니다.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Pattern B: Discovery And Search</h3>
+        <div class="grid">
+          <figure>
+            <img src="references/fever-discovery.png" alt="Fever discovery reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Fever — 검색 바, 필터, Top 10 카드가 탐색을 곧장 시작하게 만듭니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/max-browse.png" alt="Max browse reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Max — 포스터 레일과 검색이 미디어 앱의 기본 리듬을 만듭니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/audible-collections.png" alt="Audible collections reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Audible — Collections, Wish List, Authors 탭으로 보관함을 명확히 쪼갭니다.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Pattern C: Onboarding</h3>
+        <div class="grid">
+          <figure>
+            <img src="references/chatgpt-login.png" alt="ChatGPT login reference">
+            <figcaption><span class="tag">[Lazyweb]</span>ChatGPT — 다크 미니멀 인증 화면과 소셜 로그인 버튼의 계층이 깔끔합니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/reelshort-login.png" alt="ReelShort login reference">
+            <figcaption><span class="tag">[Lazyweb]</span>ReelShort — 콘텐츠 그리드 배경으로 로그인 전에도 앱의 장르를 보여줍니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/poshmark-onboarding.png" alt="Poshmark onboarding reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Poshmark — 사진 콜라주와 소셜 인증 버튼으로 첫 화면을 브랜드화합니다.</figcaption>
+          </figure>
+        </div>
+
+        <h3>Pattern D: Shareable Collections</h3>
+        <div class="grid">
+          <figure>
+            <img src="references/perplexity-collections.png" alt="Perplexity collections reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Perplexity — Library/Collections 탭과 Create CTA가 보관함을 행동 중심으로 만듭니다.</figcaption>
+          </figure>
+          <figure>
+            <img src="references/artsy-favorites.png" alt="Artsy favorites reference">
+            <figcaption><span class="tag">[Lazyweb]</span>Artsy — Saves/Follows/Alerts 구조와 컬렉션 미리보기가 공유 가능한 정체성을 만듭니다.</figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

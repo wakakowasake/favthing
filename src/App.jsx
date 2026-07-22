@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { initializeFirebase, getAuthService } from './firebase';
 import { ZINDEX } from './constants/zIndex';
@@ -19,6 +19,7 @@ import MusicDetail from './MusicDetail';
 import SeriesList from './SeriesList';
 import SeriesDetail from './SeriesDetail';
 import SharePage from './SharePage';
+import ShareDetailPage from './ShareDetailPage';
 import { getMovies, getBooks, getSongs, getSeries } from './services/firebaseService';
 
 const googleProvider = new GoogleAuthProvider();
@@ -44,6 +45,8 @@ function AppContent() {
   const [addedBooks, setAddedBooks] = useState([]);
   const [addedSongs, setAddedSongs] = useState([]);
   const [addedSeries, setAddedSeries] = useState([]);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const useFirebaseEmulator = String(import.meta.env.VITE_USE_FIREBASE_EMULATOR || '').toLowerCase() === 'true';
   const isShareRoute = location.pathname.startsWith('/share/');
 
@@ -61,6 +64,11 @@ function AppContent() {
     } else if (path.startsWith('/series')) {
       setActiveTab('series');
     }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    setShowGlobalSearch(false);
+    setGlobalSearchTerm('');
   }, [location.pathname]);
 
   // Firebase 초기화 및 로그인 상태 감시
@@ -197,6 +205,65 @@ function AppContent() {
     }
   };
 
+  const globalSearchResults = useMemo(() => {
+    const keyword = globalSearchTerm.trim().toLowerCase();
+    if (!keyword) return [];
+
+    const sources = [
+      {
+        type: 'movies',
+        label: 'Movies',
+        icon: 'movie',
+        items: addedMovies,
+        getSubtitle: (item) => item.director || item.actors || '',
+      },
+      {
+        type: 'series',
+        label: 'Series',
+        icon: 'theaters',
+        items: addedSeries,
+        getSubtitle: (item) => item.director || item.cast || '',
+      },
+      {
+        type: 'books',
+        label: 'Books',
+        icon: 'menu_book',
+        items: addedBooks,
+        getSubtitle: (item) => item.author || item.publisher || '',
+      },
+      {
+        type: 'music',
+        label: 'Music',
+        icon: 'music_note',
+        items: addedSongs,
+        getSubtitle: (item) => item.artist || item.album || '',
+      },
+    ];
+
+    return sources
+      .flatMap((source) =>
+        source.items.map((item) => ({
+          id: item.id,
+          type: source.type,
+          sectionLabel: source.label,
+          icon: source.icon,
+          title: item.title || '',
+          subtitle: source.getSubtitle(item),
+        }))
+      )
+      .filter((item) => {
+        const haystack = `${item.title} ${item.subtitle}`.toLowerCase();
+        return haystack.includes(keyword);
+      })
+      .slice(0, 20);
+  }, [globalSearchTerm, addedMovies, addedSeries, addedBooks, addedSongs]);
+
+  const handleGlobalSearchResultClick = (result) => {
+    navigate(`/${result.type}/${result.id}`);
+    setShowGlobalSearch(false);
+    setGlobalSearchTerm('');
+  };
+
   // 모든 hooks를 먼저 호출한 후 조건부 렌더링
   if (loading) {
     return (
@@ -210,6 +277,7 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/share/:userId" element={<SharePage />} />
+        <Route path="/share/:userId/:section/:itemId" element={<ShareDetailPage />} />
       </Routes>
     );
   }
@@ -286,15 +354,65 @@ function AppContent() {
         </div>
 
         <div className="flex items-center space-x-6 text-gray-300">
-          <span className="material-icons-outlined cursor-pointer hover:text-white">search</span>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowGlobalSearch((prev) => !prev)}
+              className="flex items-center hover:text-white transition"
+              title="Search"
+            >
+              <span className="material-icons-outlined">search</span>
+            </button>
+
+            {showGlobalSearch && (
+              <div className="absolute right-0 mt-2 w-[19rem] md:w-[24rem] bg-gray-900 border border-gray-700 rounded-lg shadow-2xl overflow-hidden">
+                <div className="p-3 border-b border-gray-700">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={globalSearchTerm}
+                    onChange={(e) => setGlobalSearchTerm(e.target.value)}
+                    placeholder="Search title, director, author, artist"
+                    className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {!globalSearchTerm.trim() ? (
+                    <p className="px-4 py-6 text-sm text-gray-400 text-center">Type to search.</p>
+                  ) : globalSearchResults.length === 0 ? (
+                    <p className="px-4 py-6 text-sm text-gray-400 text-center">No results found.</p>
+                  ) : (
+                    globalSearchResults.map((result) => (
+                      <button
+                        key={`${result.type}-${result.id}`}
+                        type="button"
+                        onClick={() => handleGlobalSearchResultClick(result)}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-800 transition border-b border-gray-800 last:border-b-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="material-icons-outlined text-primary text-base">{result.icon}</span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-white truncate">{result.title}</p>
+                            <p className="text-xs text-gray-400 truncate">
+                              {result.sectionLabel}
+                              {result.subtitle ? ` - ${result.subtitle}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleSharePage}
-            className="flex items-center gap-1 hover:text-white transition"
+            className="flex items-center hover:text-white transition"
             title="공유 링크"
           >
             <span className="material-icons-outlined">share</span>
-            <span className="hidden md:inline text-xs font-bold">공유</span>
           </button>
           <div className="relative group">
             <div className="flex items-center space-x-2 cursor-pointer">
@@ -610,3 +728,4 @@ function DetailLoading() {
     </div>
   );
 }
+

@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "FAV-THING",
+    "slug": "favthing-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "favthing",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.favthing.mobile",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.favthing.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#111111"
+      }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}

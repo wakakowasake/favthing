@@ -2,6 +2,7 @@
 node_modules/
 yarn.lock
 package-lock.json
+!mobile/package-lock.json
 
 # Build outputs
 dist/
@@ -33,6 +34,8 @@ pglite-debug.log
 
 # Development
 .cache/
+.expo/
+mobile/.expo/
 
 # Local Data Connect state
 dataconnect/.dataconnect/
